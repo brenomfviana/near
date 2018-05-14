@@ -72,16 +72,19 @@ class Chat(Frame):
 
   def send(self, event=NONE):
     message_content = self.message.get()
+
+    self.messages.config(state=NORMAL)
+    #self.messages.insert(END, self.user.username + ': ' + messageContent + '\n')
+
     if len(message_content) > 0 and message_content[0] == '!':
       command_interpreter = CommandInterpreter()
-      command_interpreter.interpretCommand(message_content[1:])
-    else:
-      self.tcp.send(message_content.encode('utf-8'))
-      # self.messages.config(state=NORMAL)
-      # self.messages.insert(END, self.user.username + ': ' + message_content + '\n')
-      # self.messages.config(state=DISABLED)
-      # self.messages.see(END)
-      # self.message.delete(0, END)
+      #self.messages.insert(END, 'NEAR: ' + str(commandInterpreter.interpretCommand(self.user, messageContent[1:])) + '\n')
+
+    self.tcp.send(message_content.encode('utf-8'))
+
+    #self.messages.config(state=DISABLED)
+    #self.messages.see(END)
+    #self.message.delete(0, END)
 
   def logoff(self):
     self.changed_screen = True
