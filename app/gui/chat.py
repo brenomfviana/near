@@ -21,6 +21,7 @@ class Chat(Frame):
     self.tcp = None
     self.connect()
     self.receive_thread = Thread(target=self.receive)
+    self.receive_thread.daemon = True
     self.receive_thread.start()
 
   def init_components(self):
@@ -50,16 +51,14 @@ class Chat(Frame):
     """Handles receiving of messages."""
     while self.running:
       try:
-        print("asd")
         msg = self.tcp.recv(1024).decode("utf8")
-        print("asd")
         if msg != "":
           self.messages.config(state=NORMAL)
           self.messages.insert(END, self.user.username + ': ' + msg + '\n')
           self.messages.config(state=DISABLED)
           self.messages.see(END)
           self.message.delete(0, END)
-      except OSError:  # Possibly client has left the chat.
+      except OSError: # Possibly client has left the chat.
         break
 
   def connect(self):
