@@ -77,5 +77,4 @@ class Login(Frame):
     self.window.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
   def run(self):
-    if self.running:
-      self.window.mainloop()
+    self.window.mainloop()

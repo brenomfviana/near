@@ -1,5 +1,6 @@
 from tkinter import *
 from domain.user import User
+from threading import Thread
 
 from domain.commandinterpreter import CommandInterpreter
 
@@ -17,6 +18,10 @@ class Chat(Frame):
     self.next_screen = None
     # Init components
     self.init_components()
+    self.tcp = None
+    self.connect()
+    self.receive_thread = Thread(target=self.receive)
+    self.receive_thread.start()
 
   def init_components(self):
     self.root.bind('<Return>', self.send)
@@ -40,23 +45,49 @@ class Chat(Frame):
     # Send
     send = Button(self, text="Send", width=10, command=self.send)
     send.grid(row=2, column=9, padx=(5, 5), pady=(7, 7), sticky=E)
-    # Centralize window
-    self.center()
 
-  def send(self, event=NONE):
-      messageContent = self.message.get()
-      if messageContent[0] == '!':
-          commandInterpreter = CommandInterpreter()
-          commandInterpreter.interpretCommand(messageContent[1:])
-      else:
+  def receive(self):
+    """Handles receiving of messages."""
+    while self.running:
+      try:
+        print("asd")
+        msg = self.tcp.recv(1024).decode("utf8")
+        print("asd")
+        if msg != "":
           self.messages.config(state=NORMAL)
-          self.messages.insert(END, self.user.username + ': ' + messageContent + '\n')
+          self.messages.insert(END, self.user.username + ': ' + msg + '\n')
           self.messages.config(state=DISABLED)
           self.messages.see(END)
           self.message.delete(0, END)
+      except OSError:  # Possibly client has left the chat.
+        break
+
+  def connect(self):
+    import socket
+    HOST = '127.0.0.1' # Server IP Address
+    PORT = 5000 # Server port
+    self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    dest = (HOST, PORT)
+    self.tcp.connect(dest)
+
+  def send(self, event=NONE):
+    message_content = self.message.get()
+    if len(message_content) > 0 and message_content[0] == '!':
+      command_interpreter = CommandInterpreter()
+      command_interpreter.interpretCommand(message_content[1:])
+    else:
+      self.tcp.send(message_content.encode('utf-8'))
+      # self.messages.config(state=NORMAL)
+      # self.messages.insert(END, self.user.username + ': ' + message_content + '\n')
+      # self.messages.config(state=DISABLED)
+      # self.messages.see(END)
+      # self.message.delete(0, END)
 
   def logoff(self):
     self.changed_screen = True
+    self.running = False
+    self.send("{quit}")
+    self.tcp.close()
     import gui.login
     self.next_screen = gui.login.Login(self.window)
     self.grid_forget()
@@ -64,7 +95,10 @@ class Chat(Frame):
   def quit(self):
     self.next_screen = None
     self.running = False
+    self.send("{quit}")
+    self.tcp.close()
     self.window.destroy()
+    exit()
 
   def center(self):
     self.window.update_idletasks()
@@ -76,5 +110,4 @@ class Chat(Frame):
     self.window.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
   def run(self):
-    if self.running:
-      self.window.mainloop()
+    self.window.mainloop()
