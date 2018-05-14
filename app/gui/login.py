@@ -1,10 +1,14 @@
 from tkinter import *
 from tkinter import ttk
 
+from domain.user import User
+from gui.chat import Chat
+
 class Login(Frame):
 
   def __init__(self, master=None):
     Frame.__init__(self, master)
+    self.root = master
     self.grid()
     self.window = master
     self.window.protocol('WM_DELETE_WINDOW', self.quit)
@@ -15,6 +19,7 @@ class Login(Frame):
     self.init_components()
 
   def init_components(self):
+    self.root.bind('<Return>', self.login)
     # Title
     self.window.title("Near - Login")
     self.window.resizable(width=False, height=False)
@@ -34,14 +39,14 @@ class Login(Frame):
     # User name
     label_un = Label(self, text="Username:", background="white")
     label_un.grid(row=2, column=1)
-    username = Entry(self, width=20, background="white")
-    username.grid(row=2, column=2, pady=(5, 5), sticky=W+E)
+    self.username = Entry(self, width=20, background="white")
+    self.username.grid(row=2, column=2, pady=(5, 5), sticky=W+E)
     # Language
     label_un = Label(self, text="Language:", background="white")
     label_un.grid(row=3, column=1)
-    language = ttk.Combobox(self, width=20, background="white")
-    language['values'] = ('English', 'Português Brasileiro', 'Français', 'Español', 'Italiano', 'Deutsch', 'Nederlands')
-    language.grid(row=3, column=2, pady=(5, 10), sticky=W+E)
+    self.language = ttk.Combobox(self, width=20, background="white")
+    self.language['values'] = ('English', 'Português Brasileiro', 'Français', 'Español', 'Italiano', 'Deutsch', 'Nederlands')
+    self.language.grid(row=3, column=2, pady=(5, 10), sticky=W+E)
     # Login
     button_l = Button(self, text="Confirm", width=10, command=self.login)
     button_l.grid(row=4, column=0, columnspan=4, padx=(100, 100), pady=(5, 0))
@@ -51,10 +56,10 @@ class Login(Frame):
     # Centralize window
     self.center()
 
-  def login(self):
+  def login(self, event=NONE):
+    user = User(self.username.get(), self.language.get())
     self.changed_screen = True
-    import gui.chat
-    self.next_screen = gui.chat.Chat(self.window)
+    self.next_screen = Chat(user, self.window)
     self.grid_forget()
 
   def quit(self):
