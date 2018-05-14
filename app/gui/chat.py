@@ -1,6 +1,8 @@
 from tkinter import *
 from domain.user import User
 
+from domain.commandinterpreter import CommandInterpreter
+
 class Chat(Frame):
 
   def __init__(self, user, master=None):
@@ -42,12 +44,16 @@ class Chat(Frame):
     self.center()
 
   def send(self, event=NONE):
-      self.messages.config(state=NORMAL)
-      self.messages.insert(END, self.user.username + ': ' + self.message.get() + '\n')
-      self.messages.config(state=DISABLED)
-      self.messages.see(END)
-      self.message.delete(0, END)
-      pass
+      messageContent = self.message.get()
+      if messageContent[0] == '!':
+          commandInterpreter = CommandInterpreter()
+          commandInterpreter.interpretCommand(messageContent[1:])
+      else:
+          self.messages.config(state=NORMAL)
+          self.messages.insert(END, self.user.username + ': ' + messageContent + '\n')
+          self.messages.config(state=DISABLED)
+          self.messages.see(END)
+          self.message.delete(0, END)
 
   def logoff(self):
     self.changed_screen = True
