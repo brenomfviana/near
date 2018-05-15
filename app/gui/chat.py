@@ -87,11 +87,15 @@ class Chat(Frame):
     self.messages.config(state=NORMAL)
     #self.messages.insert(END, self.user.username + ': ' + messageContent + '\n')
 
+    toSend = {}
+
     if len(message_content) > 0 and message_content[0] == '!':
       command_interpreter = CommandInterpreter()
-      #self.messages.insert(END, 'NEAR: ' + str(commandInterpreter.interpretCommand(self.user, messageContent[1:])) + '\n')
+      newMessage = str(command_interpreter.interpretCommand(self.user, message_content[1:]))
+      toSend = { 'username' : 'NEAR', 'language' : 'en', 'message' : newMessage  }
+    else:
+      toSend = { 'username' : self.user.username, 'language' : self.user.language, 'message' : message_content  }
 
-    toSend = { 'username' : self.user.username, 'language' : self.user.language, 'message' : message_content  }
     self.tcp.send(json.dumps(toSend).encode('utf-8'))
 
     #self.messages.config(state=DISABLED)
