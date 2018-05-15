@@ -58,15 +58,19 @@ class Chat(Frame):
 
         mymsg = json.loads(msg)
         messagetodisplay = mymsg['message']
+        shalltranslate = mymsg['translate']
 
         if msg != "":
           self.messages.config(state=NORMAL)
-          if mymsg['language'] == self.user.language:
-              self.messages.insert(END, mymsg['username'] + ': ' + mymsg['message'] + '\n')
+          if shalltranslate == True:
+              if mymsg['language'] == self.user.language:
+                  self.messages.insert(END, mymsg['username'] + ': ' + mymsg['message'] + '\n')
+              else:
+                  apiConsumer = APIConsumer()
+                  parameters = { 'message' : mymsg['message'], 'dstLanguage' : self.user.language, 'srcLanguage' : mymsg['language'] }
+                  self.messages.insert(END, mymsg['username'] + ': ' + str(apiConsumer.callPost('/translate', parameters, 'translatedTo')) + '\n')
           else:
-              apiConsumer = APIConsumer()
-              parameters = { 'message' : mymsg['message'], 'dstLanguage' : self.user.language, 'srcLanguage' : mymsg['language'] }
-              self.messages.insert(END, mymsg['username'] + ': ' + str(apiConsumer.callPost('/translate', parameters, 'translatedTo')) + '\n')
+              self.messages.insert(END, mymsg['username'] + ': ' + mymsg['message'] + '\n')
           self.messages.config(state=DISABLED)
           self.messages.see(END)
           self.message.delete(0, END)
@@ -90,11 +94,14 @@ class Chat(Frame):
     toSend = {}
 
     if len(message_content) > 0 and message_content[0] == '!':
+      toSend = { 'username' : self.user.username, 'language' : 'en', 'message' : message_content, 'translate' : False  }
+      self.tcp.send(json.dumps(toSend).encode('utf-8'))
+      
       command_interpreter = CommandInterpreter()
       newMessage = str(command_interpreter.interpretCommand(self.user, message_content[1:]))
-      toSend = { 'username' : 'NEAR', 'language' : 'en', 'message' : newMessage  }
+      toSend = { 'username' : 'NEAR', 'language' : 'en', 'message' : newMessage, 'translate' : True  }
     else:
-      toSend = { 'username' : self.user.username, 'language' : self.user.language, 'message' : message_content  }
+      toSend = { 'username' : self.user.username, 'language' : self.user.language, 'message' : message_content, 'translate' : True }
 
     self.tcp.send(json.dumps(toSend).encode('utf-8'))
 
