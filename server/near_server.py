@@ -20,6 +20,7 @@ def handle_client(client):  # Takes client socket as argument.
   # broadcast(bytes(msg, "utf8"))
   # Adiciona o username na lista
   clients[client] = "username"
+  c = client
 
   while True:
     msg = client.recv(BUFSIZ).decode("utf8")
@@ -27,18 +28,20 @@ def handle_client(client):  # Takes client socket as argument.
       print(msg)
       broadcast(msg, "username: ")
     else:
+      # Removes the client
       client.close()
-      # Adiciona o username na lista
-      # del clients[client]
-      # Mensagem dizendo que saiu
-      msg = name, " has left the chat."
+      del clients[client]
+      # Bye message
+      msg = "username has left the chat."
       broadcast(msg, "")
+      break
 
 
 def broadcast(msg, prefix=""):  # prefix is for name identification.
   """Broadcasts a message to all the clients."""
-  for sock in clients:
-    sock.send(msg)
+  if clients:
+    for sock in clients:
+      sock.send(msg)
 
 
 clients = {}

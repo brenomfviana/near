@@ -88,7 +88,7 @@ class Chat(Frame):
   def logoff(self):
     self.changed_screen = True
     self.running = False
-    self.send("{quit}")
+    self.tcp.send("{quit}".encode('utf-8'))
     self.tcp.close()
     import gui.login
     self.next_screen = gui.login.Login(self.window)
@@ -97,7 +97,7 @@ class Chat(Frame):
   def quit(self):
     self.next_screen = None
     self.running = False
-    self.send("{quit}")
+    self.tcp.send("{quit}".encode('utf-8'))
     self.tcp.close()
     self.window.destroy()
     exit()
