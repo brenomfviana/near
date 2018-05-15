@@ -2,6 +2,9 @@ from tkinter import *
 from domain.user import User
 from threading import Thread
 
+import json
+
+from apiconsumer.apiconsumer import APIConsumer
 from domain.commandinterpreter import CommandInterpreter
 
 class Chat(Frame):
@@ -52,9 +55,18 @@ class Chat(Frame):
     while self.running:
       try:
         msg = self.tcp.recv(1024).decode("utf8")
+
+        mymsg = json.loads(msg)
+        messagetodisplay = mymsg['message']
+
         if msg != "":
           self.messages.config(state=NORMAL)
-          self.messages.insert(END, self.user.username + ': ' + msg + '\n')
+          if mymsg['language'] == self.user.language:
+              self.messages.insert(END, mymsg['username'] + ': ' + mymsg['message'] + '\n')
+          else:
+              apiConsumer = APIConsumer()
+              parameters = { 'message' : mymsg['message'], 'dstLanguage' : self.user.language, 'srcLanguage' : mymsg['language'] }
+              self.messages.insert(END, mymsg['username'] + ': ' + str(apiConsumer.callPost('/translate', parameters, 'translatedTo')) + '\n')
           self.messages.config(state=DISABLED)
           self.messages.see(END)
           self.message.delete(0, END)
@@ -64,7 +76,7 @@ class Chat(Frame):
   def connect(self):
     import socket
     HOST = '127.0.0.1' # Server IP Address
-    PORT = 5000 # Server port
+    PORT = 33000 # Server port
     self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     dest = (HOST, PORT)
     self.tcp.connect(dest)
@@ -79,7 +91,8 @@ class Chat(Frame):
       command_interpreter = CommandInterpreter()
       #self.messages.insert(END, 'NEAR: ' + str(commandInterpreter.interpretCommand(self.user, messageContent[1:])) + '\n')
 
-    self.tcp.send(message_content.encode('utf-8'))
+    toSend = { 'username' : self.user.username, 'language' : self.user.language, 'message' : message_content  }
+    self.tcp.send(json.dumps(toSend).encode('utf-8'))
 
     #self.messages.config(state=DISABLED)
     #self.messages.see(END)

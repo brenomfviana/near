@@ -41,14 +41,14 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
   """Broadcasts a message to all the clients."""
   if clients:
     for sock in clients:
-      sock.send(msg)
+      sock.send(bytes(msg,'utf8'))
 
 
 clients = {}
 addresses = {}
 
 HOST = ''
-PORT = 5000
+PORT = 33000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
