@@ -10,8 +10,8 @@ It aims to be RESTful (Representational State Transfer) and it uses Python with 
 
 - [x] Rolling a dice of any faces through /rtd/<number of dice's faces>;
 - [x] Performing the translation of a message through /translate (via POST);
-- [ ] Database usage;
-- [ ] Use this API in Omega.
+- [x] Database usage;
+- [x] Use this API in an application.
 
 ## Setting things up
 
