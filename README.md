@@ -1,3 +1,7 @@
+<p align="center"><img src ="img/logo.png" width="300px"/></p>
+
+---
+
 # Near
 
 ## Introduction
@@ -35,6 +39,10 @@ python run.py
 ```
 
 It will start listening at localhost:5000 (I guess). Go to localhost:5000/rtd/6 to test it. The result may be a JSON containing { 'response' : <Random number between 1 and 6> }
+
+## Demonstration
+
+![Demonstration](img/demo.png)
 
 ## Team
 
